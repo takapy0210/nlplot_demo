@@ -1,0 +1,19 @@
+version: '3.4'
+
+# 共通定義のテンプレート化
+x-template:
+  &template
+  build:
+    context: .
+  volumes:
+    - ./app:/opt/program:cached
+
+services:
+  nlplot_streamlit:
+    container_name: nlplot_streamlit
+    image: nlplot_streamlit:latest
+    user: root
+    ports:
+      - "8501:8501"
+    command: streamlit run main.py
+    <<: *template
