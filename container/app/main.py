@@ -5,7 +5,7 @@ from typing import Union
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
-import nlplot as nlplot
+import nlplot
 
 STYLE = """
 <style>
@@ -129,6 +129,8 @@ def main():
             else:
                 _df = data.query('searched_for == @selected_word').copy()
             npt = nlplot.NLPlot(_df, target_col=selected_col)
+            # ストップワードの設定
+            stopwords = npt.get_stopword(top_n=2, min_freq=0)
 
             # プロット
             if plot_type == 'bar chart':
@@ -137,9 +139,11 @@ def main():
                         title='',
                         xaxis_label='word_count',
                         yaxis_label='word',
+                        stopwords=stopwords,
                         ngram=n_gram_num,
+                        width=1200,
+                        height=1300,
                         top_n=50,
-                        stopwords=[],
                     )
                 st.write(fig)
             elif plot_type == 'histogram':
@@ -160,9 +164,9 @@ def main():
                 with st.spinner('Wait for it...'):
                     fig = npt.treemap(
                         title='',
+                        stopwords=stopwords,
                         ngram=n_gram_num,
                         top_n=30,
-                        stopwords=[],
                     )
                 st.write(fig)
             elif plot_type == 'wordcloud':
@@ -172,6 +176,7 @@ def main():
                         height=600,
                         max_words=100,
                         max_font_size=100,
+                        stopwords=stopwords,
                         colormap='tab20_r',
                         mask_file=None,
                         save=False
@@ -184,7 +189,7 @@ def main():
                     st.pyplot()
             elif plot_type == 'co-occurrence network':
                 with st.spinner('Wait for it...'):
-                    npt.build_graph(stopwords=[], min_edge_frequency=20)
+                    npt.build_graph(stopwords=stopwords, min_edge_frequency=10)
                     fig = npt.co_network(
                         title='Co-occurrence network',
                         save=False
@@ -192,7 +197,7 @@ def main():
                     st.write(fig)
             elif plot_type == 'sunburst chart':
                 with st.spinner('Wait for it...'):
-                    npt.build_graph(stopwords=[], min_edge_frequency=40)
+                    npt.build_graph(stopwords=stopwords, min_edge_frequency=10)
                     fig = npt.sunburst(
                         title='Sunburst chart',
                         colorscale=True,
